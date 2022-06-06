@@ -3377,11 +3377,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\cdab9\\source\\repos\\APIWeapon\\APIWeapon\\APIWeapon.csproj",
+      "projectUniqueName": "C:\\Users\\cdab9\\Desktop\\PracticeProject\\APIWeapon\\APIWeapon.csproj",
       "projectName": "APIWeapon",
-      "projectPath": "C:\\Users\\cdab9\\source\\repos\\APIWeapon\\APIWeapon\\APIWeapon.csproj",
+      "projectPath": "C:\\Users\\cdab9\\Desktop\\PracticeProject\\APIWeapon\\APIWeapon.csproj",
       "packagesPath": "C:\\Users\\cdab9\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\cdab9\\source\\repos\\APIWeapon\\APIWeapon\\obj\\",
+      "outputPath": "C:\\Users\\cdab9\\Desktop\\PracticeProject\\APIWeapon\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

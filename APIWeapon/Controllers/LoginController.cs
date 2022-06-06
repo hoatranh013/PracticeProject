@@ -183,7 +183,7 @@ namespace APIWeapon.Controllers
         }
 
         [HttpPost("Characters/{id}/WeaponList/{weaponstring}")]
-        public IActionResult WeaponBuying(string id, string weaponstring, NotificationModel tntfct)
+        public IActionResult WeaponBuying(string id, string weaponstring)
         {
             var findcharacter = _db.CharacterModels.FirstOrDefault(s => s.Token == id);
             if (findcharacter != null)
@@ -191,6 +191,7 @@ namespace APIWeapon.Controllers
                 var findking = _db.WeaponModels.FirstOrDefault(s => s.WeaponName == weaponstring);
                 if (findking != null)
                 {
+                    var tntfct = new NotificationModel();
                     tntfct.TheSender = findcharacter.CharacterName;
                     tntfct.TheReceiver = findking.WeaponOwner;
                     tntfct.DateTime = DateTime.Now.ToString();
@@ -293,7 +294,7 @@ namespace APIWeapon.Controllers
         }
 
         [HttpPost("Character/{id}/Friend/AddFriend/{pd}")]
-            public IActionResult AddingFriend (string id,string pd,AddFriendNoti noti)
+            public IActionResult AddingFriend (string id,string pd)
         {
             var findcharacter = _db.CharacterModels.FirstOrDefault(s => s.Token == id);
             if (findcharacter != null)
@@ -301,13 +302,22 @@ namespace APIWeapon.Controllers
                 var findcontact = _db.CharacterModels.FirstOrDefault(s => s.CharacterName == pd);
                 if((findcontact != null) && (findcontact.CharacterName != findcharacter.CharacterName))
                 {
-                    noti.TheSender = findcharacter.CharacterName;
-                    noti.TheReceiver = pd;
-                    noti.DateTime = DateTime.Now.ToString();
-                    noti.HandleOrNot = false;
-                    _db.AddFriendNotis.Add(noti);
-                    _db.SaveChanges();
-                    return Ok("Waiting For The Respond");
+                    var checkfriend = _db.FriendLists.FirstOrDefault(s => s.TheOwnered == findcharacter.CharacterName && s.FriendName == findcontact.CharacterName);
+                    if (checkfriend == null)
+                    {
+                        var noti = new AddFriendNoti();
+                        noti.TheSender = findcharacter.CharacterName;
+                        noti.TheReceiver = pd;
+                        noti.DateTime = DateTime.Now.ToString();
+                        noti.HandleOrNot = false;
+                        _db.AddFriendNotis.Add(noti);
+                        _db.SaveChanges();
+                        return Ok("Waiting For The Respond");
+                    }
+                    else
+                    {
+                        return Ok("You And This Person Already Friend With Each Other");
+                    }
 
                 }
                 if((findcontact.CharacterName == findcharacter.CharacterName) && ((findcontact != null)))
@@ -352,7 +362,7 @@ namespace APIWeapon.Controllers
         }
 
         [HttpPost("Character/{id}/Friend/Notification/{it}")]
-            public IActionResult AddFriendOrNot(string id, int it, string yesorno, FriendList makeone)
+            public IActionResult AddFriendOrNot(string id, int it, string yesorno)
         {
             var findcharacter = _db.CharacterModels.FirstOrDefault(s => s.Token == id);
             if (findcharacter != null)
@@ -360,6 +370,7 @@ namespace APIWeapon.Controllers
                 var findnotirequest = _db.AddFriendNotis.FirstOrDefault(s => s.AddFriId == it);
                 if (yesorno == "Yes")
                 {
+                    var makeone = new FriendList();
                     var maketwo = new FriendList();
                     findnotirequest.HandleOrNot = true;
                     _db.SaveChanges();
@@ -391,6 +402,45 @@ namespace APIWeapon.Controllers
             {
                 return Ok("Cannot Find The Identification");
             }
+        }
+
+        [HttpDelete("Character/{id}/Friend/Delete/{bt}")]
+        public IActionResult DeleteFriend(string id,string bt)
+        {
+            var findcharacter = _db.CharacterModels.FirstOrDefault(s => s.Token == id);
+            if (findcharacter != null)
+            {
+                var findfriend = _db.CharacterModels.FirstOrDefault(s => s.CharacterName == bt);
+                if (findfriend == null)
+                {
+                    return Ok("Character Does Not Exist");
+                }
+                if (findfriend.CharacterName == bt)
+                {
+                    return Ok("You Are Implementing In Yourself");
+                }
+                else
+                {
+                    var contacter = _db.FriendLists.FirstOrDefault(s => s.TheOwnered == findcharacter.CharacterName && s.FriendName == bt);
+                    if (contacter == null)
+                    {
+                        return Ok("You And This Character Are Not Friend With Each Other");
+                    }
+                    else
+                    {
+                        var contacted = _db.FriendLists.FirstOrDefault(s => s.TheOwnered == bt && s.FriendName == findcharacter.CharacterName);
+                        _db.FriendLists.Remove(contacter);
+                        _db.FriendLists.Remove(contacted);
+                        _db.SaveChanges();
+                        return Ok("You And This Character Are No Longer Friend");
+                    }
+                }
+            }
+            else 
+            {
+                return Ok("Cannot Find The Identification");
+            }
+
         }
 
 

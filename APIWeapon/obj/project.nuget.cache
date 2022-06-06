@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "OQu0NvP2SWyUd90MKbLKBbuAsgCVFyF8Yje3jX9R1yJZI2fxktgtUxpK7ZJ6NL5rDDcmbNQXzi/KiFo9NbIMrg==",
+  "dgSpecHash": "0V6D8ZLY9mOBMWg4z/TztArSJ4SL8yQfqLYIDOcbYCXcz5ixFjKbCnju+IjXqJkgJLHTfFw+ZiqjXUiS3BYFxQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\cdab9\\source\\repos\\APIWeapon\\APIWeapon\\APIWeapon.csproj",
+  "projectFilePath": "C:\\Users\\cdab9\\Desktop\\PracticeProject\\APIWeapon\\APIWeapon.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\cdab9\\.nuget\\packages\\azure.core\\1.6.0\\azure.core.1.6.0.nupkg.sha512",
     "C:\\Users\\cdab9\\.nuget\\packages\\azure.identity\\1.3.0\\azure.identity.1.3.0.nupkg.sha512",
