@@ -10,5 +10,7 @@ namespace APIWeapon.Models
         public string Password { get; set; } = String.Empty;
         public string Class { get; set; } = String.Empty;
         public string Rule { get; set; } = String.Empty;
+
+        public string Token { get; set; } = String.Empty;
     }
 }

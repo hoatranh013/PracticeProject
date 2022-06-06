@@ -13,6 +13,13 @@ namespace APIWeapon.Data
         public DbSet<CharacterModel> CharacterModels { get; set; }
         public DbSet<LoginModel> LoginModels { get; set; }
 
+        public DbSet<WeaponModel> WeaponModels { get; set; }
+
+        public DbSet<NotificationModel> NotificationModels { get; set; }
+
+        public DbSet<FriendList> FriendLists { get; set; }
+        public DbSet<AddFriendNoti> AddFriendNotis { get; set; }
+
 
 
 

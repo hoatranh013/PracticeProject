@@ -31,7 +31,7 @@ namespace APIWeapon.Controllers
         [HttpPost]
         public ActionResult Register(CharacterModel model)
         {
-            var existingcharacter = _db.CharacterModels.FirstOrDefault(s => 
+            var existingcharacter = _db.CharacterModels.FirstOrDefault(s =>
             s.CharacterName == model.CharacterName);
 
             if (existingcharacter != null)
@@ -58,12 +58,13 @@ namespace APIWeapon.Controllers
                 {
                     Success = false,
                     Message = "Invalid username/password"
-
                 });
             }
             else
             {
                 var token = GenerateToken(characterpresent);
+                _db.CharacterModels.FirstOrDefault(s => s.CharacterName == model.UserName && s.Password == GetMD5(model.Password)).Token = token;
+                _db.SaveChanges();
                 return Ok(
                 new ApiResponse
                 {
@@ -74,11 +75,40 @@ namespace APIWeapon.Controllers
             }
         }
 
+        [HttpGet("Logout")]
+        public ActionResult Logout(string token)
+        {
+            var characterpresent = _db.CharacterModels.FirstOrDefault(s => s.Token == token);
+            if (characterpresent != null)
+            {
+                characterpresent.Token = "";
+                _db.SaveChanges();
+                return Ok("Logout Successfull");
+            }
+            else
+            {
+                return Ok("Logout Failure");
+            }
+        }
+
+
         private string GenerateToken(CharacterModel model)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
+            if (jwtTokenHandler == null)
+            {
+
+            }
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["AppSettings:SecretKey"]));
+            if (securityKey == null)
+            {
+
+            }
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            if (credentials == null)
+            {
+
+            }
             var claims = new[]
             {
                 new Claim(ClaimTypes.Name, model.CharacterName),
@@ -88,11 +118,10 @@ namespace APIWeapon.Controllers
             };
 
             var token = new JwtSecurityToken(_config["AppSettings:Issuer"],
-              _config["AppSettings:Audience"],
+              _config["AppSettings:Audience"], 
               claims,
               expires: DateTime.Now.AddMinutes(15),
               signingCredentials: credentials);
-
             return jwtTokenHandler.WriteToken(token);
         }
 

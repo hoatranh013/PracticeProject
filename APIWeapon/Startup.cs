@@ -17,7 +17,8 @@ using System.Text;
 using System.Threading.Tasks;
 using APIWeapon.Models;
 using APIWeapon.Data;
-
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace APIWeapon
 {
@@ -43,6 +44,7 @@ namespace APIWeapon
             //services.AddScoped<ILoaiRepository, LoaiRepository>();;
 
             services.Configure<AppSetting>(Configuration.GetSection("AppSettings"));
+            services.Configure<IdentityOptions>(options =>options.ClaimsIdentity.UserIdClaimType = ClaimTypes.Name);
 
             var secretKey = Configuration["AppSettings:SecretKey"];
             var secretKeyBytes = Encoding.UTF8.GetBytes(secretKey);
@@ -87,9 +89,9 @@ namespace APIWeapon
 
             app.UseStaticFiles();
 
-            app.UseRouting();
-
             app.UseAuthentication();
+
+            app.UseRouting();
 
             app.UseAuthorization();
 
