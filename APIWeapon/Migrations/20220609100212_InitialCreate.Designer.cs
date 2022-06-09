@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APIWeapon.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220609081648_Add-Migration InitalCrete")]
-    partial class AddMigrationInitalCrete
+    [Migration("20220609100212_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -159,6 +159,50 @@ namespace APIWeapon.Migrations
                     b.HasKey("NotificationId");
 
                     b.ToTable("NotificationModels");
+                });
+
+            modelBuilder.Entity("APIWeapon.Models.SearchingFriend", b =>
+                {
+                    b.Property<int>("SearchingFriendId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SearchingFriendId"), 1L, 1);
+
+                    b.Property<string>("SearchName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SearchingFriendId");
+
+                    b.ToTable("SearchingFriends");
+                });
+
+            modelBuilder.Entity("APIWeapon.Models.SearchingWeapon", b =>
+                {
+                    b.Property<int>("SearchingWeaponId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SearchingWeaponId"), 1L, 1);
+
+                    b.Property<int>("SearchingWeaponAttack")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SearchingWeaponAttribute")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SearchingWeaponDefense")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SearchingWeaponName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SearchingWeaponId");
+
+                    b.ToTable("SearchingWeapons");
                 });
 
             modelBuilder.Entity("APIWeapon.Models.WeaponModel", b =>

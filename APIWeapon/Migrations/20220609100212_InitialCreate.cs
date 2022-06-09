@@ -5,7 +5,7 @@
 namespace APIWeapon.Migrations
 {
     /// <inheritdoc />
-    public partial class AddMigrationInitalCrete : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -89,6 +89,35 @@ namespace APIWeapon.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SearchingFriends",
+                columns: table => new
+                {
+                    SearchingFriendId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SearchName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SearchingFriends", x => x.SearchingFriendId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SearchingWeapons",
+                columns: table => new
+                {
+                    SearchingWeaponId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SearchingWeaponName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SearchingWeaponDefense = table.Column<int>(type: "int", nullable: false),
+                    SearchingWeaponAttack = table.Column<int>(type: "int", nullable: false),
+                    SearchingWeaponAttribute = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SearchingWeapons", x => x.SearchingWeaponId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "WeaponModels",
                 columns: table => new
                 {
@@ -123,6 +152,12 @@ namespace APIWeapon.Migrations
 
             migrationBuilder.DropTable(
                 name: "NotificationModels");
+
+            migrationBuilder.DropTable(
+                name: "SearchingFriends");
+
+            migrationBuilder.DropTable(
+                name: "SearchingWeapons");
 
             migrationBuilder.DropTable(
                 name: "WeaponModels");

@@ -524,13 +524,13 @@ namespace APIWeapon.Controllers
 
 
 
-        private CharacterModel GetCurrentUser(string token)
+        private WhatLoginModel GetCurrentUser(string token)
         {
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             var claims = jwtSecurityTokenHandler.ReadJwtToken(token).Claims;
 
-            return new CharacterModel
-                {
+            return new WhatLoginModel
+            {
                     CharacterName = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email)?.Value,
                     Class = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value,
                     Rule = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value,
