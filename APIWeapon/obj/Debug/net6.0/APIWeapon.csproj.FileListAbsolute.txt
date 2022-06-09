@@ -152,3 +152,7 @@ C:\Users\cdab9\Desktop\PracticeProject\APIWeapon\obj\Debug\net6.0\refint\APIWeap
 C:\Users\cdab9\Desktop\PracticeProject\APIWeapon\obj\Debug\net6.0\APIWeapon.pdb
 C:\Users\cdab9\Desktop\PracticeProject\APIWeapon\obj\Debug\net6.0\APIWeapon.genruntimeconfig.cache
 C:\Users\cdab9\Desktop\PracticeProject\APIWeapon\obj\Debug\net6.0\ref\APIWeapon.dll
+C:\Users\cdab9\source\repos\APIWeapon\APIWeapon\bin\Debug\net6.0\APIWeapon.staticwebassets.runtime.json
+C:\Users\cdab9\source\repos\APIWeapon\APIWeapon\bin\Debug\net6.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+C:\Users\cdab9\source\repos\APIWeapon\APIWeapon\bin\Debug\net6.0\Microsoft.AspNetCore.Identity.UI.Views.V4.dll
+C:\Users\cdab9\source\repos\APIWeapon\APIWeapon\bin\Debug\net6.0\Microsoft.AspNetCore.Identity.UI.dll

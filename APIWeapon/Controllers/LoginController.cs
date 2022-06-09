@@ -20,11 +20,15 @@ namespace APIWeapon.Controllers
     {
         private IConfiguration _config;
         private readonly ApplicationDbContext _db;
-        public LoginController(ApplicationDbContext db, IConfiguration config)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public LoginController(ApplicationDbContext db, IConfiguration config, IHttpContextAccessor httpContextAccessor)
         {
             _db = db;
             _config = config;
+            _httpContextAccessor = httpContextAccessor;
         }
+
+
 
         [HttpGet("Kings/{id}")]
         public IActionResult KingsEndpoint(string id)
@@ -36,7 +40,9 @@ namespace APIWeapon.Controllers
             }
             else
             {
-                return Ok("Welcome Back The King");
+                var model = GetCurrentUser(id);
+                return Ok(model);
+
             }
         }
 
@@ -50,7 +56,8 @@ namespace APIWeapon.Controllers
             }
             else
             {
-                return Ok("Proud To Be A Knight - Unite We Stand");
+                var model = GetCurrentUser(id);
+                return Ok(model);
             }
         }
 
@@ -444,6 +451,68 @@ namespace APIWeapon.Controllers
         }
 
 
+        [HttpPost("Character/{id}/SearchingWeapon")]
+        public IActionResult SearchingWeapon(string id, string weap, string sch, int ind)
+        {
+            var findcharacter = _db.CharacterModels.FirstOrDefault(s => s.Token == id);
+            if (findcharacter != null)
+            {
+                if (weap == "WeaponName")
+                {
+                    IEnumerable<WeaponModel> FindWeapon = _db.WeaponModels.Where(s => s.WeaponName!.Contains(sch) && s.WeaponOwner == "Terenas Menathil");
+                    return Ok(FindWeapon);
+                }
+                if (weap == "WeaponAttribute")
+                {
+                    IEnumerable<WeaponModel> FindWeapon = _db.WeaponModels.Where(s => s.WeaponAttribute == sch && s.WeaponOwner == "Terenas Menathil");
+                    return Ok(FindWeapon);
+                }
+                if (weap == "WeaponAttack")
+                {
+                    IEnumerable<WeaponModel> FindWeapon = _db.WeaponModels.Where(s => s.WeaponAttack >= ind && s.WeaponOwner == "Terenas Menathil");
+                    return Ok(FindWeapon);
+                }
+                if (weap == "WeaponDefense")
+                {
+                    IEnumerable<WeaponModel> FindWeapon = _db.WeaponModels.Where(s => s.WeaponDefense >= ind && s.WeaponOwner == "Terenas Menathil");
+                    return Ok(FindWeapon);
+                }
+                else
+                {
+                    return Ok("Invalid Database");
+                }
+            }
+            else
+            {
+                return Ok("Cannot Find The Identification");
+            }
+        }
+
+        [HttpPost("Character/{id}/FriendList/Searching/{pt}")]
+        public IActionResult SearchFriend(string id, string pt)
+        {
+            var findcharacter = _db.CharacterModels.FirstOrDefault(s => s.Token == id);
+            if (findcharacter != null)
+            {
+                IEnumerable<FriendList> searchfriend = _db.FriendLists.Where(s => s.FriendName!.Contains(pt) && s.FriendName != findcharacter.CharacterName);
+                if (searchfriend.Count() != 0)
+                {
+                    return Ok(searchfriend);
+                }
+                else
+                {
+                    return Ok("Invalid");
+                }
+
+            }
+            else
+            {
+                return Ok("Cannot Find The Identification");
+            }
+        }
+
+
+
 
 
 
@@ -455,22 +524,17 @@ namespace APIWeapon.Controllers
 
 
 
-        private CharacterModel GetCurrentUser()
+        private CharacterModel GetCurrentUser(string token)
         {
-            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            var claims = jwtSecurityTokenHandler.ReadJwtToken(token).Claims;
 
-            if (identity != null)
-            {
-                var userClaims = identity.Claims;
-
-                return new CharacterModel
+            return new CharacterModel
                 {
-                    CharacterName = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Name)?.Value,
-                    Class = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Surname)?.Value,
-                    Rule = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Role)?.Value
-                };
-            }
-            return null;
+                    CharacterName = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email)?.Value,
+                    Class = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value,
+                    Rule = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value,
+            };
         }
     }
 }

@@ -49,25 +49,29 @@ namespace APIWeapon
             var secretKey = Configuration["AppSettings:SecretKey"];
             var secretKeyBytes = Encoding.UTF8.GetBytes(secretKey);
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(opt =>
-                {
-                    opt.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        //tự cấp token
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
+            services.AddAuthentication(options => {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+             .AddJwtBearer(jwt => {
+                 var key = Encoding.UTF8.GetBytes(Configuration["AppSettings:SecretKey"]);
 
-                        //ký vào token
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = Configuration["AppSettings:Issuer"],
-                        ValidAudience = Configuration["AppSettings:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
+                 jwt.SaveToken = true;
+                 jwt.TokenValidationParameters = new TokenValidationParameters
+                 {
+                     ValidateIssuerSigningKey = true,
+                     IssuerSigningKey = new SymmetricSecurityKey(key),
+                     ValidateIssuer = false,
+                     ValidateAudience = false,
+                     ValidateLifetime = true,
+                     RequireExpirationTime = false
+                 };
+             });
 
-                        ClockSkew = TimeSpan.Zero
-                    };
-                });
+            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            .AddEntityFrameworkStores<ApplicationDbContext>();
+
 
             services.AddSwaggerGen(c =>
             {

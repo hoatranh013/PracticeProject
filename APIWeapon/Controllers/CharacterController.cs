@@ -23,11 +23,15 @@ namespace APIWeapon.Controllers
     {
         private IConfiguration _config;
         private readonly ApplicationDbContext _db;
-        public CharacterController(ApplicationDbContext db, IConfiguration config)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public CharacterController(ApplicationDbContext db, IConfiguration config, IHttpContextAccessor httpContextAccessor)
         {
             _db = db;
             _config = config;
+            _httpContextAccessor = httpContextAccessor;
         }
+
+
         [HttpPost]
         public ActionResult Register(CharacterModel model)
         {
@@ -65,13 +69,14 @@ namespace APIWeapon.Controllers
                 var token = GenerateToken(characterpresent);
                 _db.CharacterModels.FirstOrDefault(s => s.CharacterName == model.UserName && s.Password == GetMD5(model.Password)).Token = token;
                 _db.SaveChanges();
+                var abcd = _httpContextAccessor.HttpContext?.User?.FindFirst(o => o.Type == ClaimTypes.Role);
                 return Ok(
                 new ApiResponse
                 {
                     Success = true,
                     Data = token,
-                    Message = "Success"
-                });
+                    Message = GetClaim(token)
+                }) ;
             }
         }
 
@@ -95,34 +100,24 @@ namespace APIWeapon.Controllers
         private string GenerateToken(CharacterModel model)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
-            if (jwtTokenHandler == null)
+            var key = Encoding.UTF8.GetBytes(_config["AppSettings:SecretKey"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-
-            }
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["AppSettings:SecretKey"]));
-            if (securityKey == null)
-            {
-
-            }
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            if (credentials == null)
-            {
-
-            }
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.Name, model.CharacterName),
-                new Claim(ClaimTypes.Email, model.Password),
-                new Claim(ClaimTypes.Surname, model.Class),
-                new Claim(ClaimTypes.Role, model.Rule)
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(JwtRegisteredClaimNames.Email, model.CharacterName),
+                    new Claim(JwtRegisteredClaimNames.Sub, model.Class),
+                    new Claim(JwtRegisteredClaimNames.Jti, model.Rule)
+                }),
+                Expires = DateTime.UtcNow.AddHours(6),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
-            var token = new JwtSecurityToken(_config["AppSettings:Issuer"],
-              _config["AppSettings:Audience"], 
-              claims,
-              expires: DateTime.Now.AddMinutes(15),
-              signingCredentials: credentials);
-            return jwtTokenHandler.WriteToken(token);
+
+            var token = jwtTokenHandler.CreateToken(tokenDescriptor);
+            var jwtToken = jwtTokenHandler.WriteToken(token);
+
+            return jwtToken;
         }
 
 
@@ -139,6 +134,14 @@ namespace APIWeapon.Controllers
 
             }
             return byte2String;
+        }
+
+        public static string GetClaim(string token)
+        {
+            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            var claims = jwtSecurityTokenHandler.ReadJwtToken(token).Claims;
+                
+            return claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
         }
     }
 }

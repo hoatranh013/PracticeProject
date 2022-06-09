@@ -20,6 +20,10 @@ namespace APIWeapon.Data
         public DbSet<FriendList> FriendLists { get; set; }
         public DbSet<AddFriendNoti> AddFriendNotis { get; set; }
 
+        public DbSet<SearchingWeapon> SearchingWeapons { get; set; }
+
+        public DbSet<SearchingFriend> SearchingFriends { get; set; }
+
 
 
 
