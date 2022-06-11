@@ -56,6 +56,21 @@ namespace APIWeapon.Controllers
                         requested.ToEmail = findout.Gmail;
                         requested.Subject = "Code For Resetting Password";
                         requested.Body = GenerateTokenResetPassword(findout);
+                        var tested = _db.PreviousPasswordModels.FirstOrDefault(s => s.Handle == false);
+                    if (tested != null)
+                    {
+                        tested.Handle = true;
+                        _db.SaveChanges();
+                    }
+                    if (tested == null)
+                    {
+                        _db.SaveChanges();
+                    }
+                        var newesttoken = new PreviousPasswordModel();
+                        newesttoken.PreviousToken = requested.Body;
+                        newesttoken.Handle = false;
+                        _db.PreviousPasswordModels.Add(newesttoken);
+                        _db.SaveChanges();
                         await mailService.SendEmailAsync(requested);
                         return Ok("Check Your Gmail");
                     }
@@ -66,30 +81,49 @@ namespace APIWeapon.Controllers
         [HttpPost("ForgetPasswordSuccessful/{id}")]
         public async Task<IActionResult> ResetPasswordSuccessful (string id)
         {
-            Random rnd = new Random();
-            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-            var claims = jwtSecurityTokenHandler.ReadJwtToken(id).Claims;
-            if (claims != null)
+            var checkerrortoken = _db.PreviousPasswordModels.FirstOrDefault(s => s.PreviousToken == id && s.Handle == false);
+            if (checkerrortoken != null)
             {
-                var reseted = new ResettingPasswordModel();
-                reseted.RsCharacterName = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.FamilyName)?.Value;
-                reseted.RsClass = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Gender)?.Value;
-                reseted.RsRule = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.GivenName)?.Value;
-                reseted.RsGmail = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Nonce)?.Value;
-                var findiden = _db.CharacterModels.FirstOrDefault(s => s.CharacterName == reseted.RsCharacterName && s.Gmail == reseted.RsGmail && s.Rule == reseted.RsRule);
-                int NewPassword = rnd.Next();
-                MailRequest requested = new MailRequest();
-                requested.ToEmail = findiden.Gmail;
-                requested.Subject = "Here Is Your New Password";
-                requested.Body = NewPassword.ToString();
-                await mailService.SendEmailAsync(requested);
-                findiden.Password = GetMD5(NewPassword.ToString());
-                _db.SaveChanges();
-                return Ok("Check Your Gmail");
+                var checkitnow = _db.ResettingTokens.FirstOrDefault(s => s.ResetToken == id);
+                if (checkitnow == null)
+                {
+                    Random rnd = new Random();
+                    var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+                    var claims = jwtSecurityTokenHandler.ReadJwtToken(id).Claims;
+                    if (claims != null)
+                    {
+                        var reseted = new ResettingPasswordModel();
+                        reseted.RsCharacterName = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.FamilyName)?.Value;
+                        reseted.RsClass = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Gender)?.Value;
+                        reseted.RsRule = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.GivenName)?.Value;
+                        reseted.RsGmail = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Nonce)?.Value;
+                        var findiden = _db.CharacterModels.FirstOrDefault(s => s.CharacterName == reseted.RsCharacterName && s.Gmail == reseted.RsGmail && s.Rule == reseted.RsRule);
+                        int NewPassword = rnd.Next();
+                        MailRequest requested = new MailRequest();
+                        requested.ToEmail = findiden.Gmail;
+                        requested.Subject = "Here Is Your New Password";
+                        requested.Body = NewPassword.ToString();
+                        await mailService.SendEmailAsync(requested);
+                        findiden.Password = GetMD5(NewPassword.ToString());
+                        var addingresettoken = new ResettingToken();
+                        addingresettoken.ResetToken = id;
+                        _db.ResettingTokens.Add(addingresettoken);
+                        _db.SaveChanges();
+                        return Ok("Check Your Gmail");
+                    }
+                    else
+                    {
+                        return Ok("Invalid Token Or Token Has Expired");
+                    }
+                }
+                else
+                {
+                    return Ok("This Token Has Been Used");
+                }
             }
             else
             {
-                return Ok("Invalid Token Or Token Has Expired");
+                return Ok("This Token Has Been Outdated");
             }
         }
 

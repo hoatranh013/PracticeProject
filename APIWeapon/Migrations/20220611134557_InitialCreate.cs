@@ -90,6 +90,49 @@ namespace APIWeapon.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PreviousPasswordModels",
+                columns: table => new
+                {
+                    DeId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PreviousToken = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Handle = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PreviousPasswordModels", x => x.DeId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ResettingPasswordModels",
+                columns: table => new
+                {
+                    RsId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RsCharacterName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RsClass = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RsRule = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RsGmail = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ResettingPasswordModels", x => x.RsId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ResettingTokens",
+                columns: table => new
+                {
+                    TkId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ResetToken = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ResettingTokens", x => x.TkId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SearchingFriends",
                 columns: table => new
                 {
@@ -153,6 +196,15 @@ namespace APIWeapon.Migrations
 
             migrationBuilder.DropTable(
                 name: "NotificationModels");
+
+            migrationBuilder.DropTable(
+                name: "PreviousPasswordModels");
+
+            migrationBuilder.DropTable(
+                name: "ResettingPasswordModels");
+
+            migrationBuilder.DropTable(
+                name: "ResettingTokens");
 
             migrationBuilder.DropTable(
                 name: "SearchingFriends");

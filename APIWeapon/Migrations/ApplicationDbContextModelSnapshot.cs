@@ -162,6 +162,72 @@ namespace APIWeapon.Migrations
                     b.ToTable("NotificationModels");
                 });
 
+            modelBuilder.Entity("APIWeapon.Models.PreviousPasswordModel", b =>
+                {
+                    b.Property<int>("DeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DeId"), 1L, 1);
+
+                    b.Property<bool>("Handle")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PreviousToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("DeId");
+
+                    b.ToTable("PreviousPasswordModels");
+                });
+
+            modelBuilder.Entity("APIWeapon.Models.ResettingPasswordModel", b =>
+                {
+                    b.Property<int>("RsId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RsId"), 1L, 1);
+
+                    b.Property<string>("RsCharacterName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RsClass")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RsGmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RsRule")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RsId");
+
+                    b.ToTable("ResettingPasswordModels");
+                });
+
+            modelBuilder.Entity("APIWeapon.Models.ResettingToken", b =>
+                {
+                    b.Property<int>("TkId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TkId"), 1L, 1);
+
+                    b.Property<string>("ResetToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("TkId");
+
+                    b.ToTable("ResettingTokens");
+                });
+
             modelBuilder.Entity("APIWeapon.Models.SearchingFriend", b =>
                 {
                     b.Property<int>("SearchingFriendId")

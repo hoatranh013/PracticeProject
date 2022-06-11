@@ -24,6 +24,11 @@ namespace APIWeapon.Data
 
         public DbSet<SearchingFriend> SearchingFriends { get; set; }
 
+        public DbSet<ResettingPasswordModel> ResettingPasswordModels { get; set; }
+
+        public DbSet<ResettingToken> ResettingTokens { get; set; }
+        public DbSet<PreviousPasswordModel> PreviousPasswordModels { get; set; }
+
 
 
 
