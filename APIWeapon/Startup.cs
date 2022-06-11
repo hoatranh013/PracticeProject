@@ -19,6 +19,8 @@ using APIWeapon.Models;
 using APIWeapon.Data;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using APIWeapon.Services;
+using APIWeapon.Settings;
 
 namespace APIWeapon
 {
@@ -34,7 +36,8 @@ namespace APIWeapon
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.AddTransient<IMailService, Services.MailService>();
             services.AddControllers();
 
             services.AddDbContext<ApplicationDbContext>(option => {
@@ -76,6 +79,10 @@ namespace APIWeapon
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "APIWeapon", Version = "v1" });
+            });
+            services.AddCors(c =>
+            {
+                c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin());
             });
         }
 

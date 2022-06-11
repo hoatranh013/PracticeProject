@@ -14,6 +14,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 using Hl7.Fhir.Utility;
+using APIWeapon.Models;
+using APIWeapon.Services;
 
 namespace APIWeapon.Controllers
 {
@@ -24,11 +26,103 @@ namespace APIWeapon.Controllers
         private IConfiguration _config;
         private readonly ApplicationDbContext _db;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public CharacterController(ApplicationDbContext db, IConfiguration config, IHttpContextAccessor httpContextAccessor)
+        private readonly IMailService mailService;
+        public CharacterController(ApplicationDbContext db, IConfiguration config, IHttpContextAccessor httpContextAccessor, IMailService mailService)
         {
             _db = db;
             _config = config;
             _httpContextAccessor = httpContextAccessor;
+            this.mailService = mailService;
+        }
+
+        [HttpPost("Forget Password")]
+        public async Task<IActionResult> Send(string myaccount, string mygmail)
+        {
+                var findout = _db.CharacterModels.FirstOrDefault(s => s.CharacterName == myaccount);
+                if (findout == null)
+                {
+                    return Ok("Character Is Not Valid");
+                }
+                else
+                {
+                    var checkgmail = findout.Gmail;
+                    if (checkgmail != mygmail)
+                    {
+                        return Ok("Gmail Is Not Suitable");
+                    }
+                    else
+                    {
+                        MailRequest requested = new MailRequest();
+                        requested.ToEmail = findout.Gmail;
+                        requested.Subject = "Code For Resetting Password";
+                        requested.Body = GenerateTokenResetPassword(findout);
+                        await mailService.SendEmailAsync(requested);
+                        return Ok("Check Your Gmail");
+                    }
+                }
+                return Ok();
+
+        }
+        [HttpPost("ForgetPasswordSuccessful/{id}")]
+        public async Task<IActionResult> ResetPasswordSuccessful (string id)
+        {
+            Random rnd = new Random();
+            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            var claims = jwtSecurityTokenHandler.ReadJwtToken(id).Claims;
+            if (claims != null)
+            {
+                var reseted = new ResettingPasswordModel();
+                reseted.RsCharacterName = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.FamilyName)?.Value;
+                reseted.RsClass = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Gender)?.Value;
+                reseted.RsRule = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.GivenName)?.Value;
+                reseted.RsGmail = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Nonce)?.Value;
+                var findiden = _db.CharacterModels.FirstOrDefault(s => s.CharacterName == reseted.RsCharacterName && s.Gmail == reseted.RsGmail && s.Rule == reseted.RsRule);
+                int NewPassword = rnd.Next();
+                MailRequest requested = new MailRequest();
+                requested.ToEmail = findiden.Gmail;
+                requested.Subject = "Here Is Your New Password";
+                requested.Body = NewPassword.ToString();
+                await mailService.SendEmailAsync(requested);
+                findiden.Password = GetMD5(NewPassword.ToString());
+                _db.SaveChanges();
+                return Ok("Check Your Gmail");
+            }
+            else
+            {
+                return Ok("Invalid Token Or Token Has Expired");
+            }
+        }
+
+
+        [HttpGet("Change Password")]
+        public ActionResult ChangePassword(string token, string oldpassword, string newpassword, string confirm)
+        {
+            var characterpresent = _db.CharacterModels.FirstOrDefault(s => s.Token == token);
+            if (characterpresent != null)
+            {
+                string OPS = GetMD5(characterpresent.Password);
+                if (GetMD5(oldpassword) != OPS)
+                {
+                    return Ok("Wrong Password");
+                }
+                else
+                {
+                    if (newpassword != confirm)
+                    {
+                        return Ok("Type New Password Again");
+                    }
+                    else
+                    {
+                        characterpresent.Password = GetMD5(newpassword);
+                        _db.SaveChanges();
+                        return Ok("Change Password Successful");
+                    }
+                }
+            }
+            else
+            {
+                return Ok("Identification Invalid");
+            }
         }
 
 
@@ -110,6 +204,31 @@ namespace APIWeapon.Controllers
                     new Claim(JwtRegisteredClaimNames.Jti, model.Rule)
                 }),
                 Expires = DateTime.UtcNow.AddHours(6),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+
+            var token = jwtTokenHandler.CreateToken(tokenDescriptor);
+            var jwtToken = jwtTokenHandler.WriteToken(token);
+
+            return jwtToken;
+        }
+
+        private string GenerateTokenResetPassword(CharacterModel model)
+        {
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_config["AppSettings:SecretKey"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(JwtRegisteredClaimNames.FamilyName, model.CharacterName),
+                    new Claim(JwtRegisteredClaimNames.Gender, model.Class),
+                    new Claim(JwtRegisteredClaimNames.GivenName, model.Rule),
+                    new Claim(JwtRegisteredClaimNames.Exp, "abcdeg"),
+                    new Claim(JwtRegisteredClaimNames.Nonce, model.Gmail),
+                }),
+                Expires = DateTime.UtcNow.AddMinutes(2),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 

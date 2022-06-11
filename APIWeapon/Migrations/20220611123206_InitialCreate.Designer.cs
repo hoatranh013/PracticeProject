@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APIWeapon.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220609100212_InitialCreate")]
+    [Migration("20220611123206_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -65,6 +65,10 @@ namespace APIWeapon.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Class")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Gmail")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
