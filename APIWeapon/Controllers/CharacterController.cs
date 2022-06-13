@@ -21,7 +21,7 @@ namespace APIWeapon.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CharacterController : ControllerBase
+    public class CharacterController : ICharacterController
     {
         private IConfiguration _config;
         private readonly ApplicationDbContext _db;
@@ -36,19 +36,19 @@ namespace APIWeapon.Controllers
         }
 
         [HttpPost("Forget Password")]
-        public async Task<IActionResult> Send(string myaccount, string mygmail)
+        public async Task<string> Send(string myaccount, string mygmail)
         {
                 var findout = _db.CharacterModels.FirstOrDefault(s => s.CharacterName == myaccount);
                 if (findout == null)
                 {
-                    return Ok("Character Is Not Valid");
+                    return "Character Is Not Valid";
                 }
                 else
                 {
                     var checkgmail = findout.Gmail;
                     if (checkgmail != mygmail)
                     {
-                        return Ok("Gmail Is Not Suitable");
+                        return "Gmail Is Not Suitable";
                     }
                     else
                     {
@@ -72,14 +72,14 @@ namespace APIWeapon.Controllers
                         _db.PreviousPasswordModels.Add(newesttoken);
                         _db.SaveChanges();
                         await mailService.SendEmailAsync(requested);
-                        return Ok("Check Your Gmail");
+                        return "Check Your Gmail";
                     }
                 }
-                return Ok();
+                return null;
 
         }
         [HttpPost("ForgetPasswordSuccessful/{id}")]
-        public async Task<IActionResult> ResetPasswordSuccessful (string id)
+        public async Task<string> ResetPasswordSuccessful (string id)
         {
             var checkerrortoken = _db.PreviousPasswordModels.FirstOrDefault(s => s.PreviousToken == id && s.Handle == false);
             if (checkerrortoken != null)
@@ -109,27 +109,27 @@ namespace APIWeapon.Controllers
                         addingresettoken.ResetToken = id;
                         _db.ResettingTokens.Add(addingresettoken);
                         _db.SaveChanges();
-                        return Ok("Check Your Gmail");
+                        return "Check Your Gmail";
                     }
                     else
                     {
-                        return Ok("Invalid Token Or Token Has Expired");
+                        return "Invalid Token Or Token Has Expired";
                     }
                 }
                 else
                 {
-                    return Ok("This Token Has Been Used");
+                    return "This Token Has Been Used";
                 }
             }
             else
             {
-                return Ok("This Token Has Been Outdated");
+                return "This Token Has Been Outdated";
             }
         }
 
 
         [HttpGet("Change Password")]
-        public ActionResult ChangePassword(string token, string oldpassword, string newpassword, string confirm)
+        public async Task<string> ChangePassword(string token, string oldpassword, string newpassword, string confirm)
         {
             var characterpresent = _db.CharacterModels.FirstOrDefault(s => s.Token == token);
             if (characterpresent != null)
@@ -137,60 +137,59 @@ namespace APIWeapon.Controllers
                 string OPS = GetMD5(characterpresent.Password);
                 if (GetMD5(oldpassword) != OPS)
                 {
-                    return Ok("Wrong Password");
+                    return "Wrong Password";
                 }
                 else
                 {
                     if (newpassword != confirm)
                     {
-                        return Ok("Type New Password Again");
+                        return "Type New Password Again";
                     }
                     else
                     {
                         characterpresent.Password = GetMD5(newpassword);
                         _db.SaveChanges();
-                        return Ok("Change Password Successful");
+                        return "Change Password Successful";
                     }
                 }
             }
             else
             {
-                return Ok("Identification Invalid");
+                return "Identification Invalid";
             }
         }
 
 
         [HttpPost]
-        public ActionResult Register(CharacterModel model)
+        public async Task<CharacterModel> Register(CharacterModel model)
         {
             var existingcharacter = _db.CharacterModels.FirstOrDefault(s =>
             s.CharacterName == model.CharacterName);
 
             if (existingcharacter != null)
             {
-                return Conflict("Cannot create the character because it already exists.");
+                return null;
             }
             else
             {
                 model.Password = GetMD5(model.Password);
                 _db.CharacterModels.Add(model);
                 _db.SaveChanges();
-                var resourceUrl = Path.Combine(Request.Path.ToString(), Uri.EscapeUriString(model.CharacterName));
-                return Created(resourceUrl, model);
+                return model;
             }
         }
 
         [HttpPost("Login")]
-        public ActionResult Validate([FromBody] LoginModel model)
+        public async Task<ApiResponse> Validate([FromBody] LoginModel model)
         {
             var characterpresent = _db.CharacterModels.FirstOrDefault(s => s.CharacterName == model.UserName && s.Password == GetMD5(model.Password));
             if (characterpresent == null)
             {
-                return Ok(new ApiResponse
+                return new ApiResponse
                 {
                     Success = false,
                     Message = "Invalid username/password"
-                });
+                };
             }
             else
             {
@@ -198,29 +197,29 @@ namespace APIWeapon.Controllers
                 _db.CharacterModels.FirstOrDefault(s => s.CharacterName == model.UserName && s.Password == GetMD5(model.Password)).Token = token;
                 _db.SaveChanges();
                 var abcd = _httpContextAccessor.HttpContext?.User?.FindFirst(o => o.Type == ClaimTypes.Role);
-                return Ok(
+                return
                 new ApiResponse
                 {
                     Success = true,
                     Data = token,
                     Message = GetClaim(token)
-                }) ;
+                } ;
             }
         }
 
         [HttpGet("Logout")]
-        public ActionResult Logout(string token)
+        public async Task<string> Logout(string token)
         {
             var characterpresent = _db.CharacterModels.FirstOrDefault(s => s.Token == token);
             if (characterpresent != null)
             {
                 characterpresent.Token = "";
                 _db.SaveChanges();
-                return Ok("Logout Successfull");
+                return "Logout Successfull";
             }
             else
             {
-                return Ok("Logout Failure");
+                return "Logout Failure";
             }
         }
 
