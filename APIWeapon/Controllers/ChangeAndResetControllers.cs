@@ -1,5 +1,4 @@
-﻿
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -16,47 +15,47 @@ using System.Security.Cryptography;
 using Hl7.Fhir.Utility;
 using APIWeapon.Models;
 using APIWeapon.Services;
+using APIWeapon.Interfaces;
 
 namespace APIWeapon.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CharacterController : ICharacterController
+    public class ChangeAndResetControllers : IChangeAndResetControllers
     {
         private IConfiguration _config;
         private readonly ApplicationDbContext _db;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMailService mailService;
-        public CharacterController(ApplicationDbContext db, IConfiguration config, IHttpContextAccessor httpContextAccessor, IMailService mailService)
+        public ChangeAndResetControllers(ApplicationDbContext db, IConfiguration config, IHttpContextAccessor httpContextAccessor, IMailService mailService)
         {
             _db = db;
             _config = config;
             _httpContextAccessor = httpContextAccessor;
             this.mailService = mailService;
         }
-
         [HttpPost("Forget Password")]
         public async Task<string> Send(string myaccount, string mygmail)
         {
-                var findout = _db.CharacterModels.FirstOrDefault(s => s.CharacterName == myaccount);
-                if (findout == null)
+            var findout = _db.CharacterModels.FirstOrDefault(s => s.CharacterName == myaccount);
+            if (findout == null)
+            {
+                return "Character Is Not Valid";
+            }
+            else
+            {
+                var checkgmail = findout.Gmail;
+                if (checkgmail != mygmail)
                 {
-                    return "Character Is Not Valid";
+                    return "Gmail Is Not Suitable";
                 }
                 else
                 {
-                    var checkgmail = findout.Gmail;
-                    if (checkgmail != mygmail)
-                    {
-                        return "Gmail Is Not Suitable";
-                    }
-                    else
-                    {
-                        MailRequest requested = new MailRequest();
-                        requested.ToEmail = findout.Gmail;
-                        requested.Subject = "Code For Resetting Password";
-                        requested.Body = GenerateTokenResetPassword(findout);
-                        var tested = _db.PreviousPasswordModels.FirstOrDefault(s => s.Handle == false);
+                    MailRequest requested = new MailRequest();
+                    requested.ToEmail = findout.Gmail;
+                    requested.Subject = "Code For Resetting Password";
+                    requested.Body = GenerateTokenResetPassword(findout);
+                    var tested = _db.PreviousPasswordModels.FirstOrDefault(s => s.Handle == false);
                     if (tested != null)
                     {
                         tested.Handle = true;
@@ -66,20 +65,20 @@ namespace APIWeapon.Controllers
                     {
                         _db.SaveChanges();
                     }
-                        var newesttoken = new PreviousPasswordModel();
-                        newesttoken.PreviousToken = requested.Body;
-                        newesttoken.Handle = false;
-                        _db.PreviousPasswordModels.Add(newesttoken);
-                        _db.SaveChanges();
-                        await mailService.SendEmailAsync(requested);
-                        return "Check Your Gmail";
-                    }
+                    var newesttoken = new PreviousPasswordModel();
+                    newesttoken.PreviousToken = requested.Body;
+                    newesttoken.Handle = false;
+                    _db.PreviousPasswordModels.Add(newesttoken);
+                    _db.SaveChanges();
+                    await mailService.SendEmailAsync(requested);
+                    return "Check Your Gmail";
                 }
-                return null;
+            }
+            return null;
 
         }
         [HttpPost("ForgetPasswordSuccessful/{id}")]
-        public async Task<string> ResetPasswordSuccessful (string id)
+        public async Task<string> ResetPasswordSuccessful(string id)
         {
             var checkerrortoken = _db.PreviousPasswordModels.FirstOrDefault(s => s.PreviousToken == id && s.Handle == false);
             if (checkerrortoken != null)
@@ -159,94 +158,6 @@ namespace APIWeapon.Controllers
             }
         }
 
-
-        [HttpPost]
-        public async Task<CharacterModel> Register(CharacterModel model)
-        {
-            var existingcharacter = _db.CharacterModels.FirstOrDefault(s =>
-            s.CharacterName == model.CharacterName);
-
-            if (existingcharacter != null)
-            {
-                return null;
-            }
-            else
-            {
-                model.Password = GetMD5(model.Password);
-                _db.CharacterModels.Add(model);
-                _db.SaveChanges();
-                return model;
-            }
-        }
-
-        [HttpPost("Login")]
-        public async Task<ApiResponse> Validate([FromBody] LoginModel model)
-        {
-            var characterpresent = _db.CharacterModels.FirstOrDefault(s => s.CharacterName == model.UserName && s.Password == GetMD5(model.Password));
-            if (characterpresent == null)
-            {
-                return new ApiResponse
-                {
-                    Success = false,
-                    Message = "Invalid username/password"
-                };
-            }
-            else
-            {
-                var token = GenerateToken(characterpresent);
-                _db.CharacterModels.FirstOrDefault(s => s.CharacterName == model.UserName && s.Password == GetMD5(model.Password)).Token = token;
-                _db.SaveChanges();
-                var abcd = _httpContextAccessor.HttpContext?.User?.FindFirst(o => o.Type == ClaimTypes.Role);
-                return
-                new ApiResponse
-                {
-                    Success = true,
-                    Data = token,
-                    Message = GetClaim(token)
-                } ;
-            }
-        }
-
-        [HttpGet("Logout")]
-        public async Task<string> Logout(string token)
-        {
-            var characterpresent = _db.CharacterModels.FirstOrDefault(s => s.Token == token);
-            if (characterpresent != null)
-            {
-                characterpresent.Token = "";
-                _db.SaveChanges();
-                return "Logout Successfull";
-            }
-            else
-            {
-                return "Logout Failure";
-            }
-        }
-
-
-        private string GenerateToken(CharacterModel model)
-        {
-            var jwtTokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_config["AppSettings:SecretKey"]);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(JwtRegisteredClaimNames.Email, model.CharacterName),
-                    new Claim(JwtRegisteredClaimNames.Sub, model.Class),
-                    new Claim(JwtRegisteredClaimNames.Jti, model.Rule)
-                }),
-                Expires = DateTime.UtcNow.AddHours(6),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-
-
-            var token = jwtTokenHandler.CreateToken(tokenDescriptor);
-            var jwtToken = jwtTokenHandler.WriteToken(token);
-
-            return jwtToken;
-        }
-
         private string GenerateTokenResetPassword(CharacterModel model)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
@@ -287,13 +198,7 @@ namespace APIWeapon.Controllers
             }
             return byte2String;
         }
-
-        public static string GetClaim(string token)
-        {
-            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-            var claims = jwtSecurityTokenHandler.ReadJwtToken(token).Claims;
-                
-            return claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
-        }
     }
+
 }
+

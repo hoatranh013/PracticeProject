@@ -21,6 +21,8 @@ using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using APIWeapon.Services;
 using APIWeapon.Settings;
+using APIWeapon.Interfaces;
+using APIWeapon.Controllers;
 
 namespace APIWeapon
 {
@@ -43,7 +45,6 @@ namespace APIWeapon
             services.AddDbContext<ApplicationDbContext>(option => {
                 option.UseSqlServer(Configuration.GetConnectionString("APIConnection"));
             });
-
             //services.AddScoped<ILoaiRepository, LoaiRepository>();;
 
             services.Configure<AppSetting>(Configuration.GetSection("AppSettings"));
@@ -100,9 +101,9 @@ namespace APIWeapon
 
             app.UseStaticFiles();
 
-            app.UseAuthentication();
-
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

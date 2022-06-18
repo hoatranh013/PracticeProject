@@ -27,21 +27,38 @@ namespace APIWeapon.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CharacterModels",
+                name: "dbo.CharacterModels",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CharacterName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Gmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Class = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Rule = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CharacterName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Gmail = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Class = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Rule = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Token = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CharacterModels", x => x.Id);
+                    table.PrimaryKey("PK_dbo.CharacterModels", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "dbo.WeaponModels",
+                columns: table => new
+                {
+                    WeaponId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    WeaponName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    WeaponDefense = table.Column<int>(type: "int", maxLength: 50, nullable: false),
+                    WeaponAttack = table.Column<int>(type: "int", maxLength: 50, nullable: false),
+                    WeaponAttribute = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    WeaponOwner = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_dbo.WeaponModels", x => x.WeaponId);
                 });
 
             migrationBuilder.CreateTable(
@@ -161,22 +178,11 @@ namespace APIWeapon.Migrations
                     table.PrimaryKey("PK_SearchingWeapons", x => x.SearchingWeaponId);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "WeaponModels",
-                columns: table => new
-                {
-                    WeaponId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    WeaponName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    WeaponDefense = table.Column<int>(type: "int", nullable: false),
-                    WeaponAttack = table.Column<int>(type: "int", nullable: false),
-                    WeaponAttribute = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    WeaponOwner = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_WeaponModels", x => x.WeaponId);
-                });
+            migrationBuilder.CreateIndex(
+                name: "IX_dbo.CharacterModels_CharacterName",
+                table: "dbo.CharacterModels",
+                column: "CharacterName",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -186,7 +192,10 @@ namespace APIWeapon.Migrations
                 name: "AddFriendNotis");
 
             migrationBuilder.DropTable(
-                name: "CharacterModels");
+                name: "dbo.CharacterModels");
+
+            migrationBuilder.DropTable(
+                name: "dbo.WeaponModels");
 
             migrationBuilder.DropTable(
                 name: "FriendLists");
@@ -211,9 +220,6 @@ namespace APIWeapon.Migrations
 
             migrationBuilder.DropTable(
                 name: "SearchingWeapons");
-
-            migrationBuilder.DropTable(
-                name: "WeaponModels");
         }
     }
 }

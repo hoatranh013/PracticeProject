@@ -15,18 +15,19 @@ using System.Security.Cryptography;
 using Hl7.Fhir.Utility;
 using APIWeapon.Models;
 using APIWeapon.Services;
+using System.Linq.Expressions;
 
-namespace APIWeapon.Controllers
+namespace APIWeapon.Interfaces
 {
-    public interface ICharacterController
+    public interface IGenericRepositoryControllers<T> where T : class
     {
-        Task<string> Send(string myaccount, string mygmail);
+        void Add(T entity,string id );
 
-        Task<string> ResetPasswordSuccessful(string id);
+        void Update(T entity,string id);
 
-        Task<string> ChangePassword(string token, string oldpassword, string newpassword, string confirm);
-        Task<CharacterModel> Register(CharacterModel model);
-        Task<ApiResponse> Validate([FromBody] LoginModel model);
-        Task<string> Logout(string token);
+        void Delete(T entity,string id);
+
+        IEnumerable<T> All(string id);
+
     }
 }

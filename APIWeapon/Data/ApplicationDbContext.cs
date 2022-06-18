@@ -29,6 +29,33 @@ namespace APIWeapon.Data
         public DbSet<ResettingToken> ResettingTokens { get; set; }
         public DbSet<PreviousPasswordModel> PreviousPasswordModels { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CharacterModel>(e =>
+            {
+                e.ToTable("dbo.CharacterModels");
+                e.HasKey(dh => dh.Id);
+                e.Property(dh => dh.CharacterName).IsRequired().HasMaxLength(100);
+                e.HasIndex(dh => dh.CharacterName).IsUnique(true);
+                e.Property(dh => dh.Password).IsRequired().HasMaxLength(50);
+                e.Property(dh => dh.Gmail).IsRequired().HasMaxLength(50);
+                e.Property(dh => dh.Class).IsRequired().HasMaxLength(50);
+                e.Property(dh => dh.Rule).IsRequired().HasMaxLength(50);
+
+            });
+
+            modelBuilder.Entity<WeaponModel>(e =>
+            {
+                e.ToTable("dbo.WeaponModels");
+                e.HasKey(dh => dh.WeaponId);
+                e.Property(dh => dh.WeaponName).IsRequired().HasMaxLength(100);
+                e.Property(dh => dh.WeaponAttack).IsRequired().HasMaxLength(50);
+                e.Property(dh => dh.WeaponDefense).IsRequired().HasMaxLength(50);
+                e.Property(dh => dh.WeaponAttribute).IsRequired().HasMaxLength(50);
+
+            });
+        }
+
 
 
 
