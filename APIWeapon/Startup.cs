@@ -23,6 +23,7 @@ using APIWeapon.Services;
 using APIWeapon.Settings;
 using APIWeapon.Interfaces;
 using APIWeapon.Controllers;
+using APIWeapon.Repository;
 
 namespace APIWeapon
 {
@@ -40,6 +41,7 @@ namespace APIWeapon
         {
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
             services.AddTransient<IMailService, Services.MailService>();
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddControllers();
 
             services.AddDbContext<ApplicationDbContext>(option => {

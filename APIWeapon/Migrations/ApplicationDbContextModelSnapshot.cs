@@ -92,6 +92,17 @@ namespace APIWeapon.Migrations
                         .IsUnique();
 
                     b.ToTable("dbo.CharacterModels", (string)null);
+                    b.HasData(
+                        new
+                        {
+                            Id = 4214124,
+                            CharacterName = "Terenas Menathil",
+                            Password = "bb0f7e021d52a4e31613d463fc0525d8",
+                            Gmail = "chaunguyengiang2000@gmail.com",
+                            Class = "Paladin",
+                            Rule = "King",
+                            Token = ""
+                        });
                 });
 
             modelBuilder.Entity("APIWeapon.Models.FriendList", b =>
@@ -313,7 +324,102 @@ namespace APIWeapon.Migrations
                     b.HasKey("WeaponId");
 
                     b.ToTable("dbo.WeaponModels", (string)null);
+                    b.HasData(
+                            new
+                            {
+                                WeaponId = 4134322,
+                                WeaponName = "Stormbreaker - Thunder Hummer",
+                                WeaponAttack = 1500,
+                                WeaponDefense = 1800,
+                                WeaponAttribute = "Light",
+                                WeaponOwner = "Terenas Menathil"
+                            });
                 });
+            modelBuilder.Entity("APIWeapon.Models.SuggestionClassModel", b =>
+            {
+                b.Property<int>("SuggestionClassId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SuggestionClassId"), 1L, 1);
+
+                b.Property<string>("SuggestionClassName")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(50)");
+
+                b.Property<string>("SuggestionClassDescription")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(50)");
+
+                b.Property<string>("SuggestionClassAttribute")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(50)");
+                b.Property<string>("SuggestionClassWeapon")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(50)");
+                b.Property<string>("SuggestionClassEffect")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(50)");
+
+                b.HasKey("SuggestionClassId");
+
+                b.ToTable("dbo.SuggestionClass");
+            });
+            modelBuilder.Entity("APIWeapon.Models.SuggestionGameModel", b =>
+            {
+                b.Property<int>("SuggestionGameId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SuggestionGameId"), 1L, 1);
+
+                b.Property<string>("SuggestionGameDescription")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(50)");
+
+                b.Property<string>("SuggestionGamePros")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(50)");
+
+                b.Property<string>("SuggestionGameCons")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(50)");
+                b.Property<int>("SuggestionGameRate")
+                    .IsRequired()
+                    .HasColumnType("int");
+
+                b.HasKey("SuggestionGameId");
+
+                b.ToTable("dbo.SuggestionGame");
+            });
+
+            modelBuilder.Entity("APIWeapon.Models.SuggestionWeaponModel", b =>
+            {
+                b.Property<int>("SuggestWeaponId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SuggestWeaponId"), 1L, 1);
+
+                b.Property<string>("SuggestWeaponName")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(50)");
+
+                b.Property<string>("SuggestWeaponEffect")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(50)");
+
+                b.Property<string>("SuggestWeaponAttribute")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(50)");
+                b.Property<string>("SuggestWeaponDescription")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(50)");
+
+                b.HasKey("SuggestWeaponId");
+
+                b.ToTable("dbo.SuggestionWeapon");
+            });
 #pragma warning restore 612, 618
         }
     }

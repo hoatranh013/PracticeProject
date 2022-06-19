@@ -27,6 +27,55 @@ namespace APIWeapon.Migrations
                 });
 
             migrationBuilder.CreateTable(
+name: "dbo.SuggestionClass",
+        columns: table => new
+        {
+            SuggestionClassId = table.Column<int>(type: "int", nullable: false)
+                .Annotation("SqlServer:Identity", "1, 1"),
+            SuggestionClassName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+            SuggestionClassDescription = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+            SuggestionClassAttribute = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+            SuggestionClassWeapon = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+            SuggestionClassEffect = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+        },
+        constraints: table =>
+        {
+            table.PrimaryKey("PK_dbo.SuggestionClass", x => x.SuggestionClassId);
+        });
+
+            migrationBuilder.CreateTable(
+name: "dbo.SuggestionGame",
+        columns: table => new
+        {
+            SuggestionGameId = table.Column<int>(type: "int", nullable: false)
+                .Annotation("SqlServer:Identity", "1, 1"),
+            SuggestionGameDescription = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+            SuggestionGamePros = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+            SuggestionGameCons = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+            SuggestionGameRate = table.Column<int>(type: "int", maxLength: 50, nullable: false),
+        },
+        constraints: table =>
+        {
+            table.PrimaryKey("PK_dbo.SuggestionGame", x => x.SuggestionGameId);
+        });
+
+            migrationBuilder.CreateTable(
+name: "dbo.SuggestionWeapon",
+columns: table => new
+{
+SuggestWeaponId = table.Column<int>(type: "int", nullable: false)
+    .Annotation("SqlServer:Identity", "1, 1"),
+SuggestWeaponName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+    SuggestWeaponEffect = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+    SuggestWeaponAttribute = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+    SuggestWeaponDescription = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+},
+constraints: table =>
+{
+table.PrimaryKey("PK_dbo.SuggestionWeapon", x => x.SuggestWeaponId);
+});
+
+            migrationBuilder.CreateTable(
                 name: "dbo.CharacterModels",
                 columns: table => new
                 {
@@ -177,7 +226,14 @@ namespace APIWeapon.Migrations
                 {
                     table.PrimaryKey("PK_SearchingWeapons", x => x.SearchingWeaponId);
                 });
-
+            migrationBuilder.InsertData(
+    table: "dbo.CharacterModels",
+    columns: new[] { "Id", "CharacterName", "Password", "Gmail", "Class", "Rule", "Token" },
+    values: new object[] { 4214124, "Terenas Menathil", "bb0f7e021d52a4e31613d463fc0525d8", "chaunguyengiang2000@gmail.com", "Paladin", "King", "" });
+            migrationBuilder.InsertData(
+table: "dbo.WeaponModels",
+columns: new[] { "WeaponId", "WeaponName", "WeaponAttack", "WeaponDefense", "WeaponAttribute", "WeaponOwner" },
+values: new object[] { 4134322, "Stormbreaker - Thunder Hummer", 1500, 1800, "Light", "Terenas Menathil" });
             migrationBuilder.CreateIndex(
                 name: "IX_dbo.CharacterModels_CharacterName",
                 table: "dbo.CharacterModels",
@@ -185,8 +241,8 @@ namespace APIWeapon.Migrations
                 unique: true);
         }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
+/// <inheritdoc />
+protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "AddFriendNotis");

@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using APIWeapon.Models;
+using APIWeapon.Configuration;
 
 namespace APIWeapon.Data
 {
@@ -28,9 +29,19 @@ namespace APIWeapon.Data
 
         public DbSet<ResettingToken> ResettingTokens { get; set; }
         public DbSet<PreviousPasswordModel> PreviousPasswordModels { get; set; }
+        public DbSet<SuggestionGameModel> SuggestionGameModels { get; set; }
+        public DbSet<SuggestionClassModel> SuggestionClassModels { get; set; }
+        public DbSet<SuggestionWeaponModel> SuggestionWeaponModels { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.ApplyConfiguration(new CharacterConfiguration());
+            modelBuilder.ApplyConfiguration(new WeaponConfiguration());
+
+
             modelBuilder.Entity<CharacterModel>(e =>
             {
                 e.ToTable("dbo.CharacterModels");
